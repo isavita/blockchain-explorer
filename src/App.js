@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Blockchain from './components/blockchain.js';
+import Blockchain from './components/Blockchain.js';
 
 class App extends Component {
   render() {
