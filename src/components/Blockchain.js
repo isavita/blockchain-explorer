@@ -3,6 +3,12 @@ import ToggleableBlock from './ToggleableBlock';
 require ('../seed.js');
 
 export default class Blockchain extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = { blocks: [] };
+  }
+
   render() {
     // const blockchain = window.Seed.blockchain.map((block) => (
       // <Block
@@ -21,19 +27,19 @@ export default class Blockchain extends Component {
           id={'block-1'}
           index={1}
           date={null}
-          previous_hash={'somerandomhash'}
-          hash={'the_hash_of_this_block'}
+          previous_hash={'null'}
+          hash={'the_hash_of_this_block1'}
+          nonce={'Random1 32-bit Integer'}
           timestamp={new Date().getTime()}
-          isOpen={true}
         />
         <ToggleableBlock
-          id={'block-1'}
-          index={1}
+          id={'block-2'}
+          index={2}
           date={null}
-          previous_hash={'somerandomhash'}
-          hash={'the_hash_of_this_block'}
+          previous_hash={'first_block_hash'}
+          hash={'the_hash_of_this_block1'}
+          nonce={'Random2 32-bit Integer'}
           timestamp={new Date().getTime()}
-          isOpen={false}
         />
       </div>
     );

@@ -7,3 +7,8 @@ body {
 .block {
   border: 1px solid blue;
 }
+
+.blockchain {
+  display: flex;
+  justify-content: flex-start;
+}
