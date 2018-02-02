@@ -10,36 +10,25 @@ export default class Blockchain extends Component {
   }
 
   render() {
-    // const blockchain = window.Seed.blockchain.map((block) => (
-      // <Block
-      //   key={'block-' + block.index}
-      //   index={block.index}
-      //   data={block.data}
-      //   previous_hash={block.previous_hash}
-      //   hash={block.hash}
-      //   timestamp={block.timestamp}
-      // />
-    // ));
-
     return (
       <div className="blockchain">
         <ToggleableBlock
           id={'block-1'}
           index={1}
-          date={null}
+          date={'null'}
           previous_hash={'null'}
-          hash={'the_hash_of_this_block1'}
-          nonce={'Random1 32-bit Integer'}
+          hash={'000005e3b13ab5ab8272a78ec'}
+          nonce={'4125931309'}
           timestamp={new Date().getTime()}
         />
         <ToggleableBlock
           id={'block-2'}
           index={2}
           date={null}
-          previous_hash={'first_block_hash'}
-          hash={'the_hash_of_this_block1'}
-          nonce={'Random2 32-bit Integer'}
-          timestamp={new Date().getTime()}
+          previous_hash={'000005e3b13ab5ab8272a78ec'}
+          hash={'00000d387a3f3e5c0aebd3847'}
+          nonce={'1350385326'}
+          timestamp={new Date().getTime() + 587000}
         />
       </div>
     );

@@ -26,7 +26,7 @@ export default class Block extends Component {
               {this.props.nonce}
             </p>
             <p data-tooltip='Timestamp' data-position='left center'>
-              {Date(this.props.timestamp).toString()}
+              {new Date(this.props.timestamp).toString()}
             </p>
           </div>
           <div className='extra content center aligned transaction-list'>
