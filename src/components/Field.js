@@ -5,15 +5,16 @@ class Field extends Component {
   constructor(props) {
     super(props);
 
+    this.onChange = this.onChange.bind(this);
     this.state = {
       value: this.props.value,
       error: false
     };
   }
 
-  onChange(evt) {
+  onChange(ev) {
     const name = this.props.name;
-    const value = evt.target.value;
+    const value = ev.target.value;
     const error = this.props.validate ? this.props.validate(value) : false;
 
     this.setState({ value, error });
@@ -31,7 +32,7 @@ class Field extends Component {
         <input
           placeholder={this.props.placeholder}
           value={this.props.value}
-          onChange={this.props.onChange}
+          onChange={this.onChange}
         />
         <span style={{ color: 'red' }}>{this.state.error}</span>
       </div>

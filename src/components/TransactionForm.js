@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import Field from './Field';
 
 export default class TransactionForm extends Component {
   constructor(props) {
@@ -7,60 +8,93 @@ export default class TransactionForm extends Component {
     this.onFormSubmit = this.onFormSubmit.bind(this);
     this.onInputChange = this.onInputChange.bind(this);
     this.validate = this.validate.bind(this);
-    this.isEmail = this.isEmail.bind(this);
 
     this.state = {
-      fields: { name: '', email: '' },
+      fields: { recipient: '', amount: '', fee: '' },
       fieldErrors: {},
-      people: [],
+      transactions: [],
     };
   }
 
-  validate(person) {
-    const errors = {};
-    if (!person.name) errors.name = 'Name Required';
-    if (!person.email) errors.email = 'Email Required';
-    return errors;
+  validate() {
+    const transaction = this.state.fields;
+    const fieldErrors = this.state.fieldErrors;
+    const errorMessages = Object.keys(fieldErrors).filter((k) => fieldErrors[k]);
+
+    if (!transaction.recipient) return true;
+    if (!transaction.amount) return true;
+    if (errorMessages.length) return true;
+
+    return false;
   }
 
   onFormSubmit(ev) {
+    const transactions = this.state.transactions;
+    const transaction = this.state.fields;
+
     ev.preventDefault();
-    const errors = this.validate(this.state.fields);
-    if (Object.keys(errors).length === 0) {
-      this.setState({ 
-        people: [...this.state.people, this.state.fields],
-        fields: { name: '', email: '' },
-        fieldErrors: {},
-      });
-    } else {
-      this.setState({ fieldErrors: errors });
-    }
+
+    if (this.validate()) return;
+
+    this.setState({ 
+      transactions: transactions.concat(transaction),
+      fields: { recipient: '', amount: '', fee: '' },
+    });
   }
 
-  onInputChange(ev) {
+  onInputChange({name, value, error}) {
     const fields = this.state.fields;
-    fields[ev.target.name] = ev.target.value;
-    this.setState({ fields });
+    const fieldErrors = this.state.fieldErrors;
+
+    fields[name] = value;
+    fieldErrors[name] = error;
+
+    this.setState({ fields, fieldErrors });
   }
   
   render() {
-    const people = this.state.people.map(({ name, email }, i) => <li key={i}>{name} ({email})</li>);
+    const transactions = this.state.transactions.map(({ recipient, amount, fee }, i) =>
+      <li key={i}>
+        Recipient Address: {recipient}
+        Amount: {amount}
+        Transaction Fee: {fee}
+      </li>
+    );
     return (
       <div>
         <h1>Create Transaction</h1>
         <form onSubmit={this.onFormSubmit}>
-          <input placeholder='Name' name='name' value={this.state.fields.name} onChange={this.onInputChange}/>
-          <span style={{ color: 'red' }}>{this.state.fieldErrors.name}</span>
+          <Field 
+            placeholder='Recipient Address'
+            name='recipient'
+            value={this.state.fields.recipient}
+            onChange={this.onInputChange}
+            validate={(val) => (val ? false : 'Recipient Address Required')}
+          />
           <br />
-          <input placeholder='Email' name='email' value={this.state.fields.email} onChange={this.onInputChange}/>
-          <span style={{ color: 'red' }}>{this.state.fieldErrors.email}</span>
+          <Field
+            placeholder='Amount'
+            name='amount'
+            value={this.state.fields.amount}
+            onChange={this.onInputChange}
+            validate={(val) => (val ? false : 'Amount Required')}
+          />
           <br />
-          <input type='submit' />
+          <Field
+            placeholder='Fee'
+            name='fee'
+            value={this.state.fields.fee}
+            onChange={this.onInputChange}
+            validate={(val) => (false)}
+          />
+          <br />
+          <input type='submit' disabled={this.validate()}/>
         </form>
-        <h1>Names</h1>
-        <ul className='input-people'>
-          {people}
-        </ul>
+
+        <h1>Transactions</h1>
+        <ol>
+          {transactions}
+        </ol>
       </div>
     );
   }
