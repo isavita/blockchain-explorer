@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Field from './Field';
+import CourseSelect from './CourseSelect';
 
 export default class TransactionForm extends Component {
   constructor(props) {
@@ -10,9 +11,11 @@ export default class TransactionForm extends Component {
     this.validate = this.validate.bind(this);
 
     this.state = {
-      fields: { recipient: '', amount: '', fee: '' },
+      fields: { recipient: '', amount: '', fee: '', department: null, course: null },
       fieldErrors: {},
       transactions: [],
+      _loading: false,
+      _saveStatus: 'READY',
     };
   }
 
@@ -23,23 +26,35 @@ export default class TransactionForm extends Component {
 
     if (!transaction.recipient) return true;
     if (!transaction.amount) return true;
+    if (!transaction.department) return true;
+    if (!transaction.course) return true;
     if (errorMessages.length) return true;
 
     return false;
   }
 
   onFormSubmit(ev) {
-    const transactions = this.state.transactions;
     const transaction = this.state.fields;
 
     ev.preventDefault();
 
     if (this.validate()) return;
 
-    this.setState({ 
-      transactions: transactions.concat(transaction),
-      fields: { recipient: '', amount: '', fee: '' },
-    });
+    const transactions = [...this.state.transactions, transaction];
+
+    this.setState({ _saveStatus: 'SAVING' });
+    apiClient.saveTransactions(transactions)
+      .then(() => {
+        this.setState({ 
+          transactions: transactions,
+          fields: { recipient: '', amount: '', fee: '', department: null, course: null },
+          _saveStatus: 'SUCCESS',
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+        this.setState({ _saveStatus: 'ERROR' });
+      });
   }
 
   onInputChange({name, value, error}) {
@@ -49,10 +64,21 @@ export default class TransactionForm extends Component {
     fields[name] = value;
     fieldErrors[name] = error;
 
-    this.setState({ fields, fieldErrors });
+    this.setState({ fields, fieldErrors, _saveStatus: 'READY' });
+  }
+
+  componentWillMount() {
+    this.setState({ _loading: true });
+    apiClient.loadTransactions().then((transactions) => {
+      this.setState({ _loading: false, transactions: transactions });
+    });
   }
   
   render() {
+    if (this.state._loading) {
+      return <img alt='loading' src='/img/loading.gif' />;
+    }
+
     const transactions = this.state.transactions.map(({ recipient, amount, fee }, i) =>
       <li key={i}>
         Recipient Address: {recipient}
@@ -60,6 +86,14 @@ export default class TransactionForm extends Component {
         Transaction Fee: {fee}
       </li>
     );
+
+    const submitButton = {
+      SAVING: <input value='Saving...' type='submit' disabled />,
+      SUCCESS: <input value='Saved!' type='submit' disabled />,
+      ERROR: <input value='Save Failed - Retry?' type='submit' disabled={this.validate()} />,
+      READY: <input value='Submit' type='submit' disabled={this.validate()} />,
+    };
+
     return (
       <div>
         <h1>Create Transaction</h1>
@@ -88,7 +122,13 @@ export default class TransactionForm extends Component {
             validate={(val) => (false)}
           />
           <br />
-          <input type='submit' disabled={this.validate()}/>
+          <CourseSelect
+            department={this.state.fields.department}
+            course={this.state.fields.course}
+            onChange={this.onInputChange}
+          />
+          <br />
+          {submitButton[this.state._saveStatus]}
         </form>
 
         <h1>Transactions</h1>
@@ -99,3 +139,31 @@ export default class TransactionForm extends Component {
     );
   }
 }
+
+const apiClient = {
+  loadTransactions: function () {
+    return {
+      then: function (cb) {
+        setTimeout(() => { 
+          cb(JSON.parse(localStorage.transactions || '[]'));
+        }, 1000);
+      }
+    };
+  },
+  
+  saveTransactions: function (transactions) {
+    const success = !!(this.count++ % 2);
+
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        if (!success) return reject({ success });
+
+        localStorage.transactions = JSON.stringify(transactions);
+        return resolve({ success });
+      }, 1000);
+    });
+  },
+
+  count: 1
+};
+
